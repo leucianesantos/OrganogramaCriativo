@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Supply Champions League</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
+
+body{
+  min-height:100vh;
+
+  background:
+    radial-gradient(circle at 50% 100%, rgba(120,30,255,.22) 0%, transparent 34%),
+    radial-gradient(circle at 80% 75%, rgba(0,180,255,.18) 0%, transparent 32%),
+    linear-gradient(180deg, #061f8f 0%, #03176b 45%, #00072a 100%);
+
+  background-attachment:fixed;
+  color:white;
+  overflow-x:hidden;
+  position:relative;
+}
+
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+
+  background:
+    radial-gradient(ellipse at 20% 82%, transparent 0 56%, rgba(80,150,255,.18) 56.5%, transparent 57.4%),
+    radial-gradient(ellipse at 78% 22%, transparent 0 58%, rgba(50,130,255,.14) 58.5%, transparent 59.2%),
+    radial-gradient(ellipse at 72% 100%, transparent 0 48%, rgba(190,70,255,.18) 48.5%, transparent 49.5%);
+
+  opacity:.85;
+  pointer-events:none;
+  z-index:-1;
+}
+
+body::after{
+  content:"";
+  position:fixed;
+  inset:0;
+
+  background:
+    linear-gradient(118deg, transparent 0 31%, rgba(0, 170, 255, 0.956) 31.15%, transparent 31.45%),
+    linear-gradient(36deg, transparent 0 66%, rgba(169, 70, 255, 0.697) 66.15%, transparent 66.45%),
+    linear-gradient(142deg, transparent 0 76%, rgba(0, 119, 255, 0.608) 76.15%, transparent 76.45%);
+
+
+  filter:blur(.1px);
+  opacity:.70;
+  pointer-events:none;
+  z-index:-1;
+}
+
+.page{padding:30px;}
+header{margin-bottom:30px;}
+
+.header-content{
+  display:flex;
+  align-items:center;
+  justify-content:left;
+  gap:10px;
+}
+
+.logo{
+  width:110px;
+  height:auto;
+  object-fit:contain;
+  filter:drop-shadow(0 0 25px rgba(208, 191, 61, 0.733));
+}
+
+.header-text{text-align:center;}
+h1{
+  font-size:50px;
+  line-height:.95;
+  text-transform:uppercase;
+
+  background:linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #fcfdff6f 35%,
+    #f4f4f4 70%,
+    #fefeff2a 100%
+  );
+
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+
+  background-clip:text;
+  color:transparent;
+
+  text-shadow:
+    0 0 12px rgba(255,170,0,.18);
+}
+
+.subtitle{
+  margin-top:12px;
+  color:#b8c7f8;
+  font-size:16px;
+}
+
+.arena{
+  width:100vw;
+  height:calc(100vh - 210px);
+  min-height:720px;
+
+  margin-left:calc(50% - 50vw);
+
+  position:relative;
+  overflow:hidden;
+
+  border-radius:5px;
+
+  border:1px solid rgb(255, 240, 72);
+
+  background:#0063f8;
+
+  box-shadow:0 20px 80px rgba(255, 255, 255, 0.55);
+}
+
+.arena-video{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  z-index:0;
+}
+
+.arena::before{
+  content:"";
+  position:absolute;
+  inset:0;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255,255,255,.08),
+      rgba(255,255,255,.02)
+    ),
+
+    radial-gradient(
+      circle at top,
+      rgba(0,102,255,.22),
+      rgba(0,8,20,.82) 72%
+    );
+
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(6px);
+
+  border-top:1px solid rgba(255,255,255,.18);
+  border-left:1px solid rgba(255,255,255,.10);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.12),
+    inset 0 -1px 0 rgba(255,255,255,.04);
+
+  z-index:1;
+  pointer-events:none;
+}
+
+.toolbar{
+  position:absolute;
+  top:1px;
+  right:18px;
+  z-index:10;
+  display:flex;
+  gap:10px;
+  border:1px solid rgba(1, 7, 29, 0.173);
+  backdrop-filter:blur(5px);
+  padding:10px;
+  border-radius:1px;
+}
+
+.tool-btn{
+  min-width:42px;
+  height:38px;
+  border:0;
+  border-radius:5px;
+  cursor:pointer;
+  font-size:8px;
+  font-weight:700;
+  color:#fefefec4;
+  background:#efefef4e;
+  padding:0 12px;
+}
+
+.org-viewport{
+  position:relative;
+  z-index:2;
+  width:100%;
+  height:100%;
+  overflow:auto;
+  cursor:grab;
+}
+
+.org-viewport:active{cursor:grabbing;}
+
+.org-canvas{
+  min-width:1900px;
+  min-height:1600px;
+  padding:55px;
+  transform-origin:top left;
+  transition:transform .25s ease;
+}
+
+/* =====================================================
+TREE - ESPAÇAMENTO INTELIGENTE
+===================================================== */
+
+.tree{
+  display:flex;
+  justify-content:center;
+  min-width:max-content;
+}
+
+.tree ul{
+  position:relative;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  gap:2px;
+  padding-top:24px;
+  transition:gap .45s ease, padding-top .45s ease;
+}
+
+.tree li{
+  list-style:none;
+  text-align:center;
+  position:relative;
+  padding:24px 1px 0 1px;
+  transition:padding .45s ease;
+}
+
+.tree > ul > li{padding-top:0;}
+
+/* Só o grupo aberto ganha espaçamento */
+.tree li.nivel-0.opened > ul{gap:4px;}
+.tree li.nivel-1.opened > ul{gap:10px;}
+
+.tree li.nivel-2.opened > ul,
+.tree li.nivel-3.opened > ul,
+.tree li.nivel-4.opened > ul{
+  gap:8px;
+}
+
+/* Conectores */
+.tree li::before,
+.tree li::after{
+  content:"";
+  position:absolute;
+  top:0;
+  right:50%;
+  border-top:2px solid rgba(255, 239, 13, 0.826);
+  width:50%;
+  height:24px;
+}
+
+.tree li::after{
+  right:auto;
+  left:50%;
+  border-left:2px solid rgba(20, 255, 251, 0.967);
+}
+
+.tree li:only-child::before,
+.tree li:only-child::after{display:none;}
+
+.tree li:only-child{padding-top:0;}
+
+.tree li:first-child::before,
+.tree li:last-child::after{border:0;}
+
+.tree li:last-child::before{
+  border-right:2px solid rgba(255,255,255,.32);
+  border-radius:0 8px 0 0;
+}
+
+.tree li:first-child::after{
+  border-radius:8px 0 0 0;
+}
+
+.tree ul ul::before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:50%;
+  border-left:2px solid rgba(255,255,255,.32);
+  width:0;
+  height:24px;
+}
+
+/* Abaixo de supervisão cresce para baixo */
+.vertical-children > ul{
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  padding-top:22px;
+}
+
+.vertical-children.opened > ul{
+  gap:8px;
+}
+
+.vertical-children > ul > li{
+  padding:16px 0 0 0;
+}
+
+.vertical-children > ul > li::before,
+.vertical-children > ul > li::after{
+  display:none;
+}
+
+.vertical-children > ul::before{
+  height:22px;
+}
+
+/* Correção principal:
+   fechado agora NÃO ocupa espaço invisível */
+.tree li > ul{
+  opacity:1;
+  transform:translateY(0);
+  transition:
+    opacity .45s ease,
+    transform .55s ease,
+    gap .45s ease,
+    padding .45s ease;
+}
+
+.tree li.collapsed > ul{
+  display:none;
+}
+
+/* =====================================================
+CARDS COMPACTOS - CANTOS 5PX
+===================================================== */
+
+.card{
+  width:205px;
+  min-height:96px;
+  border-radius:5px;
+  padding:10px 12px;
+  position:relative;
+  background:linear-gradient(145deg,rgba(158, 157, 134, 0.92),rgba(4,8,20,.96));
+  border:1px solid rgba(255,255,255,.18);
+  backdrop-filter:blur(12px);
+  box-shadow:0 10px 30px rgba(0,0,0,.42);
+  transition:.3s;
+  display:inline-block;
+}
+
+.nivel-0 > .card{
+  width:250px;
+  min-height:108px;
+  border-radius:5px;
+  background:linear-gradient(145deg,rgba(84, 6, 6, 0.92),rgba(4,8,20,.96));
+}
+
+.nivel-1 > .card{
+  width:210px;
+  min-height:96px;
+  border-radius:5px;
+  background:linear-gradient(145deg,rgba(45, 244, 114, 0.92),rgba(4,8,20,.96));
+}
+
+.nivel-2 > .card{
+  width:198px;
+  min-height:90px;
+  border-radius:5px;
+  background:linear-gradient(145deg,rgba(158, 157, 134, 0.92),rgba(4,8,20,.96));
+}
+
+.vertical-children > ul > li > .card{
+  width:180px;
+  min-height:78px;
+  padding:8px 10px;
+  border-radius:5px;
+}
+
+.card.time-direto{
+  width:198px;
+  min-height:90px;
+ background:linear-gradient(145deg,rgba(158, 157, 134, 0.92),rgba(4,8,20,.96));
+  border:1px solid rgba(179, 143, 143, 0.28);
+  border-radius:5px;
+}
+
+.card.area-operacoes{
+  border-color:rgba(0,120,255,.65);
+  box-shadow:0 10px 28px rgba(0,80,255,.28);
+}
+
+.card.area-transportes{
+  border-color:rgba(37, 197, 203, 0.65);
+  box-shadow:0 10px 28px rgba(30, 3, 74, 0.25);
+}
+
+.card.area-planejamento{
+  border-color:rgba(80,140,255,.65);
+  box-shadow:0 10px 28px rgba(80,140,255,.25);
+}
+
+.card.area-compras{
+  border-color:rgba(30,90,200,.70);
+  box-shadow:0 10px 28px rgba(30,90,200,.28);
+}
+
+.card.area-suporte{
+  border-color:rgba(120,160,255,.65);
+  box-shadow:0 10px 28px rgba(120,160,255,.25);
+}
+
+.card:hover{
+  transform:translateY(-4px) scale(1.02);
+
+  border-color:rgba(0,140,255,.55);
+
+  box-shadow:
+    0 12px 40px rgba(10, 244, 221, 0.827),
+    inset 0 1px 0 rgb(235, 218, 61);
+}
+
+.top{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  margin-bottom:8px;
+  text-align:left;
+}
+
+.photo{
+  width:80px;
+  height:90px;
+  border-radius:50%;
+  overflow:hidden;
+  border:2px solid rgba(255,255,255,.35);
+  flex-shrink:0;
+  background:#0d1736;
+  display:grid;
+  place-items:center;
+  font-weight:900;
+  color:#b8c7f8;
+  font-size:13px;
+}
+
+.nivel-0 > .card .photo{
+  width:95px;
+  height:110px;
+}
+
+.vertical-children > ul > li > .card .photo{
+  width:38px;
+  height:38px;
+  font-size:11px;
+}
+
+.photo img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.info{
+  min-width:0;
+}
+
+.info h3{
+  font-size:11.5px;
+  margin-bottom:3px;
+  line-height:1.1;
+  text-transform:uppercase;
+  white-space:normal;
+}
+
+.nivel-0 > .card .info h3{
+  font-size:13px;
+}
+
+.info p{
+  font-size:10.5px;
+  color:#b8c7f8;
+  line-height:1.15;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+
+.vertical-children > ul > li > .card .info p{
+  font-size:10px;
+  -webkit-line-clamp:1;
+}
+
+.setor{
+  display:inline-block;
+  margin-top:4px;
+  font-size:9px;
+  padding:3px 7px;
+  border-radius:5px;
+  background:rgba(255,255,255,.10);
+  color:#fff;
+}
+
+.actions{
+  display:flex;
+  gap:6px;
+}
+
+.btn{
+  flex:1;
+  border:none;
+  border-radius:2px;
+  padding:3px 4px;
+  font-size:8px;
+  font-weight:400;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.btn:hover{transform:scale(1.03);}
+
+.expand{
+  background:rgb(232, 227, 230);
+  color:#001F6F;
+}
+
+.linkedin{
+  background:#0077b5;
+  color:white;
+}
+
+.linkedin.disabled{
+  background:rgba(143, 137, 137, 0.16);
+  color:#333742;
+  cursor:not-allowed;
+}
+
+/* =========================================
+TELA INICIAL CHAMPIONS
+========================================= */
+
+.intro-screen{
+  position:absolute;
+  inset:0;
+
+  z-index:50;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0,0,0,.35),
+      rgba(0,0,0,.68)
+    ),
+
+    url("Imagens/iniciojogo.jpg");
+
+  background-size:cover;
+  background-position:center;
+
+  transition:
+    opacity .8s ease,
+    visibility .8s ease;
+}
+
+.intro-screen.hidden{
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+}
+
+.intro-content{
+  text-align:center;
+  backdrop-filter:blur(8px);
+
+  background:rgba(0,0,0,.18);
+
+  padding:40px 50px;
+
+  border:1px solid rgba(255,255,255,.15);
+
+  box-shadow:
+    0 20px 60px rgba(0,0,0,.45);
+
+  border-radius:8px;
+}
+
+.intro-title{
+  font-size:58px;
+  font-weight:900;
+  text-transform:uppercase;
+
+  margin-bottom:12px;
+
+  background:linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #d9e4ff 100%
+  );
+
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+
+  letter-spacing:2px;
+}
+
+.intro-subtitle{
+  color:#dbe5ff;
+  font-size:16px;
+  margin-bottom:35px;
+  letter-spacing:1px;
+}
+
+.play-button{
+  width:95px;
+  height:95px;
+
+  border-radius:50%;
+
+  border:none;
+
+  cursor:pointer;
+
+  position:relative;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(255,255,255,.95) 0%,
+      rgba(255,255,255,.82) 100%
+    );
+
+  box-shadow:
+    0 0 40px rgba(255,255,255,.28),
+    0 0 80px rgba(0,140,255,.18);
+
+  transition:.35s ease;
+}
+
+.play-button:hover{
+  transform:scale(1.08);
+
+  box-shadow:
+    0 0 50px rgba(255,255,255,.38),
+    0 0 100px rgba(0,140,255,.28);
+}
+
+.play-button::before{
+  content:"";
+
+  position:absolute;
+
+  top:50%;
+  left:50%;
+
+  transform:
+    translate(-40%,-50%);
+
+  width:0;
+  height:0;
+
+  border-top:16px solid transparent;
+  border-bottom:16px solid transparent;
+  border-left:26px solid #ff3c00;
+}
+
+
+
+/* =========================================
+LINKEDIN MODAL
+========================================= */
+
+.linkedin-modal{
+  position:fixed;
+  inset:0;
+
+  background:rgba(0,0,0,.72);
+
+  backdrop-filter:blur(8px);
+
+  z-index:9999;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  opacity:0;
+  visibility:hidden;
+
+  transition:.35s ease;
+}
+
+.linkedin-modal.active{
+  opacity:1;
+  visibility:visible;
+}
+
+.linkedin-window{
+  width:min(92vw,1200px);
+  height:min(88vh,760px);
+
+  background:#0b1020;
+
+  border:1px solid rgba(255,255,255,.12);
+
+  box-shadow:
+    0 20px 80px rgba(0,0,0,.65),
+    0 0 60px rgba(0,140,255,.15);
+
+  border-radius:12px;
+
+  overflow:hidden;
+
+  display:flex;
+  flex-direction:column;
+
+  animation:modalIn .35s ease;
+}
+
+@keyframes modalIn{
+  from{
+    transform:translateY(20px) scale(.96);
+    opacity:0;
+  }
+
+  to{
+    transform:translateY(0) scale(1);
+    opacity:1;
+  }
+}
+
+.linkedin-topbar{
+  height:52px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #0f172f,
+      #09101f
+    );
+
+  border-bottom:1px solid rgba(255,255,255,.08);
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  padding:0 18px;
+}
+
+.linkedin-title{
+  font-size:13px;
+  color:#dce6ff;
+  font-weight:600;
+}
+
+.linkedin-close{
+  width:34px;
+  height:34px;
+
+  border:none;
+  border-radius:6px;
+
+  cursor:pointer;
+
+  background:rgba(255,255,255,.08);
+
+  color:white;
+
+  font-size:16px;
+
+  transition:.25s ease;
+}
+
+.linkedin-close:hover{
+  background:#ff3b30;
+}
+
+.linkedin-frame{
+  flex:1;
+  width:100%;
+  border:none;
+  background:white;
+}
+
+.linkedin-fallback{
+  flex:1;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+
+  gap:18px;
+
+  color:white;
+
+  padding:40px;
+  text-align:center;
+}
+
+.linkedin-open{
+  padding:14px 24px;
+
+  border:none;
+  border-radius:8px;
+
+  cursor:pointer;
+
+  background:#0077b5;
+  color:white;
+
+  font-weight:700;
+
+  transition:.25s ease;
+}
+
+.linkedin-open:hover{
+  transform:scale(1.04);
+}
+
+
+
+@media(max-width:700px){
+  .page{padding:20px;}
+  .header-content{flex-direction:column;}
+  .header-text{text-align:center;}
+  .logo{width:140px;}
+  h1{font-size:38px;}
+  .arena{height:75vh;}
+  .org-canvas{
+    min-width:2000px;
+    padding:50px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<main class="page">
+
+<header>
+  <div class="header-content">
+    <img src="Imagens/champions_catupiry.png" class="logo" alt="Champions Catupiry">
+
+    <div class="header-text">
+      <h1>Supply Chain<br>Champions</h1>
+      <p class="subtitle">Organograma Executivo Supply</p>
+    </div>
+  </div>
+</header>
+
+<section class="arena">
+
+  <div class="intro-screen" id="introScreen">
+
+  <div class="intro-content">
+
+    <div class="intro-title">
+      Apita o Árbitro, Rola a Bola!
+    </div>
+
+    <div class="intro-subtitle">
+      SUPPLY CHAMPIONS LEAGUE
+    </div>
+
+    <button class="play-button" id="startExperience"></button>
+
+  </div>
+
+</div>
+
+  <video class="arena-video" autoplay muted loop playsinline>
+    <source src="videoestadio.mp4" type="video/mp4">
+  </video>
+
+  <div class="toolbar">
+    <button class="tool-btn" id="zoomOut">−</button>
+    <button class="tool-btn" id="zoomReset">100%</button>
+    <button class="tool-btn" id="zoomIn">+</button>
+  </div>
+
+  <div class="org-viewport" id="viewport">
+    <div class="org-canvas" id="canvas">
+      <div class="tree" id="tree"></div>
+    </div>
+  </div>
+
+</section>
+
+</main>
+
+<!-- =========================================
+LINKEDIN MODAL
+========================================= -->
+
+<div class="linkedin-modal" id="linkedinModal">
+
+  <div class="linkedin-window">
+
+    <div class="linkedin-topbar">
+
+      <div class="linkedin-title">
+        LinkedIn Profile
+      </div>
+
+      <button class="linkedin-close" id="closeLinkedin">
+        ✕
+      </button>
+
+    </div>
+
+    <iframe
+      class="linkedin-frame"
+      id="linkedinFrame">
+    </iframe>
+
+    <div class="linkedin-fallback" id="linkedinFallback" style="display:none;">
+
+      <h2>
+        O LinkedIn bloqueou a visualização interna.
+      </h2>
+
+      <p>
+        Clique abaixo para abrir o perfil em uma nova aba.
+      </p>
+
+      <button
+        class="linkedin-open"
+        id="openLinkedinExternal">
+
+        Abrir LinkedIn
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+</body>
+</html>
+
+<script>
+const pessoas = [
+  {id:"41", parent:null, cargo:"Diretor", nome:"LEANDRO PINHO", funcao:"Diretor de Supply Chain", setor:"Supply Chain", img:"https://media.licdn.com/dms/image/v2/D4D03AQEfvKYzk322Dw/profile-displayphoto-scale_400_400/B4DZ3KRz3GHwAg-/0/1777215160906?e=1780531200&v=beta&t=BtyVQKa4WgugXAg6TjPLGQgo6xAUu8ANDr5ont4LCyA", linkedin:"https://www.linkedin.com/in/leandrologistica/"},
+
+  {id:"1", parent:"41", cargo:"Gerente Armazém", nome:"GABRIEL ALEIXO", funcao:"Gerente de Operações/CS", setor:"Operações & CS", img:"https://media.licdn.com/dms/image/v2/D4D03AQErgJslFnxn9g/profile-displayphoto-scale_400_400/B4DZ4iOcpBHgAg-/0/1778690674186?e=1780531200&v=beta&t=fz1scnjhVarRbsUlF9TIS9vpS14P6lr39lap8E2CkQU", linkedin:"https://www.linkedin.com/in/gabriel-aleixo-4a9814187/"},
+  {id:"2", parent:"41", cargo:"Gerente Transportes", nome:"FABIO VENEZIAN", funcao:"Gerente de Transportes", setor:"Transportes", img:"https://media.licdn.com/dms/image/v2/D4D03AQESjC5QyzOiDg/profile-displayphoto-scale_400_400/B4DZ4iMiZYIUAg-/0/1778690176683?e=1780531200&v=beta&t=l2COhf3dt4llz3Ibse4mDbcyvdcBZ2kVSwL6D8B7CvA", linkedin:"https://www.linkedin.com/in/fabiovenezian/"},
+  {id:"3", parent:"41", cargo:"Gerente Planejamento", nome:"SANDER SILVA", funcao:"Gerente de Planejamento", setor:"Planejamento", img:"https://media.licdn.com/dms/image/v2/C4D03AQHc4B0WkkjrBw/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1580955020588?e=1780531200&v=beta&t=Xf_6MsN0IncKld6bD-2stKpsmAl5XHQ8DuK0VsvdEkQ", linkedin:"https://www.linkedin.com/in/sander-alves-da-silva-94014724/"},
+  {id:"4", parent:"41", cargo:"Gerente", nome:"DANIELA SINHORINI", funcao:"Gerente de Compras", setor:"Compras", img:"https://media.licdn.com/dms/image/v2/D4D03AQF787sHpcw6lg/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1700849753583?e=1780531200&v=beta&t=5iU4Qd0gWIJ8pVKeKuEWNc6RO9z_iE67u4--zRTrvI0", linkedin:"https://www.linkedin.com/in/daniela-sinhorini-alves/"},
+  {id:"5S", parent:"41", cargo:"Supervisor", nome:"LEUCIANE DA SILVA SANTOS", funcao:"Suporte de Melhorias", setor:"Suporte", img:"https://media.licdn.com/dms/image/v2/D4D03AQFDV4jDT1ry2A/profile-displayphoto-shrink_400_400/B4DZfvBlqdGkAg-/0/1752061861536?e=1780531200&v=beta&t=3tZC6PXEDXquCkDkrgcaofViefkvBVNTvczTon0fVY4", linkedin:"https://www.linkedin.com/in/leuciane-santos-897212154/"},
+
+  {id:"5", parent:"1", cargo:"Supervisor", nome:"ALEX SANDRO R BOMFIM GUARDIA", funcao:"Supervisão das Operações CD JDI", setor:"Operações & CS", img:"", linkedin:""},
+  {id:"43", parent:"1", cargo:"Supervisor", nome:"FELIPE ASSIS", funcao:"Supervisão das Operações CD JDI", setor:"Operações & CS", img:"https://media.licdn.com/dms/image/v2/C4D03AQFeSHh8f0U30Q/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1631830916699?e=1780531200&v=beta&t=O4eaOKBi5oZX7LpL6qwIJ3nmUk8zu6P54vnTbEhsKhg", linkedin:"https://www.linkedin.com/in/felipejassis/"},
+  {id:"11", parent:"1", cargo:"Supervisor", nome:"ERICK MICHAEL VALENTIM", funcao:"Supervisão das Operações CD JDI", setor:"Operações & CS", img:"https://media.licdn.com/dms/image/v2/D4D03AQExUe5D3Nj_Bw/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1722433092300?e=1780531200&v=beta&t=NK3p_Dt2Si4-EpeO32feiuSqtZB7RiQQt1M9sgLihpw", linkedin:"https://www.linkedin.com/in/erick-valentim-b3bb3015a/"},
+
+  {id:"9", parent:"1", cargo:"Assistente", nome:"SUELLEN DE SOUZA FERREIRA", funcao:"Assistente de Faturamento", setor:"Operações & CS", img:"", linkedin:""},
+  {id:"10", parent:"1", cargo:"Analista", nome:"FELIPE HENRIQUE FERREIRA", funcao:"Analista de Faturamento", setor:"Operações & CS", img:"", linkedin:""},
+  {id:"12", parent:"1", cargo:"Analista", nome:"TAMIRES CYRINO DE OLIVEIRA", funcao:"Analista de Customer Service", setor:"Operações & CS", img:"", linkedin:""},
+  {id:"13", parent:"1", cargo:"Analista", nome:"BRUNO DOS SANTOS DUARTE", funcao:"Analista de Faturamento", setor:"Operações & CS", img:"", linkedin:""},
+  {id:"14", parent:"1", cargo:"Analista", nome:"IZABELLA MENDES MOREIRA", funcao:"Analista de Customer Service", setor:"Operações & CS", img:"", linkedin:""},
+  {id:"45", parent:"1", cargo:"Analista", nome:"JANETE CANUTO N DE ALBUQUERQUE", funcao:"Analista de Customer Service", setor:"Operações & CS", img:"", linkedin:""},
+  {id:"46", parent:"1", cargo:"Analista", nome:"MILLENA GONCALVES DE OLIVEIRA", funcao:"Analista de Customer Service", setor:"Operações & CS", img:"", linkedin:""},
+  {id:"47", parent:"1", cargo:"Analista", nome:"VANIA LUCIA BATISTA BARRETO", funcao:"Analista de Customer Service", setor:"Operações & CS", img:"", linkedin:""},
+
+  {id:"8", parent:"5", cargo:"Analista", nome:"EUZILENE ROSA DE OLIVEIRA", funcao:"Analista de Estoque", setor:"Operações & CS", img:"", linkedin:""},
+  {id:"30", parent:"5", cargo:"Conferentes", nome:"VICTOR ANTONIO M G DA CRUZ", funcao:"Analista de Estoque", setor:"Operações & CS", img:"", linkedin:""},
+  {id:"35", parent:"5", cargo:"Conferentes", nome:"IGOR BAGGIO FERREIRA", funcao:"Assistente de Estoque/Devoluções", setor:"Operações & CS", img:"", linkedin:""},
+
+  {id:"36", parent:"11", cargo:"Conferentes", nome:"CARLOS HUMBERTO S QUINTILIANO", funcao:"Conferente CD UB", setor:"Operações & CS", img:"", linkedin:""},
+  {id:"42", parent:"11", cargo:"Conferentes", nome:"BRUNO", funcao:"Conferente CD UB", setor:"Operações & CS", img:"", linkedin:""},
+
+  {id:"7", parent:"43", cargo:"Conferentes", nome:"LUIZ FELIPE ALVES PRADO", funcao:"Conferente CD JDI", setor:"Operações & CS", img:"", linkedin:""},
+  {id:"15", parent:"43", cargo:"Conferentes", nome:"LUIS GUSTAVO RODRIGUES", funcao:"Conferente CD JDI", setor:"Operações & CS", img:"", linkedin:""},
+  {id:"29", parent:"43", cargo:"Conferentes", nome:"LEANDRO PAES DE ALMEIDA", funcao:"Conferente CD JDI", setor:"Operações & CS", img:"", linkedin:""},
+  {id:"31", parent:"43", cargo:"Conferentes", nome:"FELIPE DA CRUZ BATISTA", funcao:"Conferente CD JDI", setor:"Operações & CS", img:"", linkedin:""},
+  {id:"32", parent:"43", cargo:"Conferentes", nome:"VINICIUS LUAN DE AZEVEDO JEPES", funcao:"Conferente CD JDI", setor:"Operações & CS", img:"", linkedin:""},
+  {id:"33", parent:"43", cargo:"Conferentes", nome:"MOISES ANTONIO DA SILVA", funcao:"Conferente CD JDI", setor:"Operações & CS", img:"", linkedin:""},
+  {id:"34", parent:"43", cargo:"Conferentes", nome:"PAULA CRISTINA C AMERICO", funcao:"Conferente CD JDI", setor:"Operações & CS", img:"", linkedin:""},
+
+  {id:"6", parent:"2", cargo:"Supervisor", nome:"JOSIMAR RODRIGUES VILELA", funcao:"Supervisor de Monitoramento de Entregas", setor:"Transportes", img:"https://media.licdn.com/dms/image/v2/C4D03AQEo0osoigVLyA/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1641260207050?e=1780531200&v=beta&t=QO5-HOv8hewHW33u3C2fdVjzCxsLlLjVy8IqND5stb4", linkedin:"https://www.linkedin.com/in/josimar-rodrigues-vilela-4a09a831/"},
+  {id:"20", parent:"2", cargo:"Analista", nome:"HENRIQUE ALBUQUERQUE L BRYLA", funcao:"Analista de Gestão de Fretes", setor:"Transportes", img:"", linkedin:""},
+  {id:"21", parent:"2", cargo:"Assistente", nome:"WINNETON DA SILVA TEIXEIRA", funcao:"Assistente de Gestão de Fretes", setor:"Transportes", img:"", linkedin:""},
+  {id:"22", parent:"2", cargo:"Assistente", nome:"RAQUEL MARRARA BANACO", funcao:"Assistente de Gestão de Fretes", setor:"Transportes", img:"", linkedin:""},
+  {id:"23", parent:"2", cargo:"Analista", nome:"FERNANDO XAVIER CORTEZ", funcao:"Analista de Roteirização", setor:"Transportes", img:"", linkedin:""},
+  {id:"24", parent:"2", cargo:"Assistente", nome:"JESSICA SILVA DE OLIVEIRA", funcao:"Assistente de Roteirização", setor:"Transportes", img:"", linkedin:""},
+  {id:"51", parent:"2", cargo:"Analista", nome:"LEANDRO ALMEIDA", funcao:"Analista de Roteirização", setor:"Transportes", img:"", linkedin:""},
+
+
+  
+  {id:"50", parent:"6", cargo:"Analista", nome:"LUIZ PRADO", funcao:"Assistente de Monitoramento", setor:"Transportes", img:"", linkedin:""},
+  {id:"37", parent:"6", cargo:"Analista", nome:"TATIANE DA SILVA BARROS", funcao:"Analista de Monitoramento", setor:"Transportes", img:"", linkedin:""},
+  {id:"38", parent:"6", cargo:"Analista", nome:"NATALIA OLIVEIRA LIMA", funcao:"Analista de Monitoramento", setor:"Transportes", img:"", linkedin:""},
+  {id:"39", parent:"6", cargo:"Assistente", nome:"CLAUDIA CRISTINA T P BARBOSA", funcao:"Assistente de Monitoramento", setor:"Transportes", img:"", linkedin:""},
+  {id:"40", parent:"6", cargo:"Assistente", nome:"CLEVISSON SANTOS CIRILO", funcao:"Assistente de Monitoramento", setor:"Transportes", img:"", linkedin:""},
+
+  {id:"16", parent:"3", cargo:"Supervisor", nome:"URSULA F MAIA OLIVEIRA", funcao:"Supervisão de DRP", setor:"Planejamento", img:"https://media.licdn.com/dms/image/v2/D4D03AQHNTWPcKRP8QA/profile-displayphoto-shrink_400_400/B4DZbMjjYNG0Ao-/0/1747188595436?e=1780531200&v=beta&t=E_UUEE0J_BtD2hwlTEWyriR2T22ko0G7QH1JhaKaMNI", linkedin:"https://www.linkedin.com/in/ursulamaia/"},
+  {id:"17", parent:"16", cargo:"Analista", nome:"MATHEUS HENRIQUE AMBROGI LIMEI", funcao:"Analista de DRP", setor:"Planejamento", img:"", linkedin:""},
+  {id:"18", parent:"3", cargo:"Analista", nome:"THIAGO DUQUE SANTA CAPITA", funcao:"Analista de PCP", setor:"Planejamento", img:"", linkedin:""},
+  {id:"19", parent:"3", cargo:"Analista", nome:"LEANDRO RODRIGUES SILVA", funcao:"Analista de PCP", setor:"Planejamento", img:"", linkedin:""},
+  {id:"44", parent:"3", cargo:"Analista", nome:"MARCELO RIBEIRO", funcao:"Analista de PCP", setor:"Planejamento", img:"", linkedin:""},
+  {id:"49", parent:"16", cargo:"Analista", nome:"ANDREY SILVA", funcao:"Analista de PCP", setor:"Planejamento", img:"", linkedin:""},
+
+  {id:"28", parent:"4", cargo:"Coordenador", nome:"MICHEL JORGE DA SILVA GUEDES", funcao:"Coordenador de Compras", setor:"Compras", img:"https://media.licdn.com/dms/image/v2/D4D03AQEk63EVe8zNlA/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1712677187050?e=1780531200&v=beta&t=MrwVDBi6u5M9EI3O6akjw4zZRHpMs3PUTnIoIViwzYc", linkedin:"https://www.linkedin.com/in/michel-silva-guedes/"},
+  {id:"25", parent:"4", cargo:"Analista", nome:"RODRIGO DE MATOS SANTANA", funcao:"Analista de Compras", setor:"Compras", img:"", linkedin:""},
+  {id:"26", parent:"4", cargo:"Analista", nome:"LEONARDO SILVA BATISTA DE MELO", funcao:"Analista de Compras", setor:"Compras", img:"", linkedin:""},
+  {id:"27", parent:"4", cargo:"Analista", nome:"RAONY VINICIUS SILVA POSTACIO", funcao:"Analista de Compras", setor:"Compras", img:"", linkedin:""},
+  {id:"45C", parent:"4", cargo:"Analista", nome:"RONALDO FRANÇA", funcao:"Analista de Compras", setor:"Compras", img:"", linkedin:""},
+  {id:"48", parent:"4", cargo:"Jovem Aprendiz", nome:"Damaris Chappy", funcao:"Jovem Aprendiz Compras", setor:"Compras", img:"", linkedin:""}
+];
+
+const tree = document.getElementById("tree");
+const cargosLideranca = ["Diretor","Gerente","Supervisor","Coordenador"];
+
+function ehLideranca(pessoa){
+  return cargosLideranca.some(cargo =>
+    pessoa.cargo.toLowerCase().includes(cargo.toLowerCase())
+  );
+}
+
+function getInitials(nome){
+  return nome.split(" ").filter(Boolean).slice(0,2).map(p => p[0]).join("");
+}
+
+function childrenOf(id){
+  return pessoas.filter(p => p.parent === id && p.id !== p.parent);
+}
+
+function getAreaClass(pessoa){
+  const texto = `${pessoa.setor} ${pessoa.funcao}`.toLowerCase();
+
+  if(texto.includes("operações") || texto.includes("cs")) return "area-operacoes";
+  if(texto.includes("transportes")) return "area-transportes";
+  if(texto.includes("planejamento") || texto.includes("pcp") || texto.includes("drp")) return "area-planejamento";
+  if(texto.includes("compras")) return "area-compras";
+  if(texto.includes("suporte")) return "area-suporte";
+
+  return "";
+}
+
+function getResumoTimeDireto(pessoasDiretas){
+  const grupos = pessoasDiretas.map(p => {
+    const texto = `${p.funcao} ${p.setor}`.toLowerCase();
+
+    if(texto.includes("faturamento")) return "Faturamento";
+    if(texto.includes("customer") || texto.includes("cs")) return "CS";
+    if(texto.includes("estoque")) return "Estoque";
+    if(texto.includes("monitoramento")) return "Monitoramento";
+    if(texto.includes("roteirização")) return "Roteirização";
+    if(texto.includes("fretes")) return "Fretes";
+    if(texto.includes("compras")) return "Compras";
+    if(texto.includes("pcp")) return "PCP";
+    if(texto.includes("drp")) return "DRP";
+
+    return p.setor || "Equipe";
+  });
+
+  return [...new Set(grupos)].join(" / ");
+}
+
+function createCard(pessoa, hasChildren, extraClass = ""){
+  const linkedinButton = pessoa.linkedin
+    ? `<button class="btn linkedin" onclick="openLinkedinModal('${pessoa.linkedin}')">LinkedIn</button>`
+    : `<button class="btn linkedin disabled" disabled>LinkedIn</button>`;
+
+  const expandButton = hasChildren
+    ? `<button class="btn expand">+</button>`
+    : "";
+
+  const imageHtml = pessoa.img
+    ? `<img src="${pessoa.img}" onerror="this.remove(); this.parentElement.textContent='${getInitials(pessoa.nome)}';">`
+    : getInitials(pessoa.nome);
+
+  return `
+    <div class="card ${extraClass} ${getAreaClass(pessoa)}">
+      <div class="top">
+        <div class="photo">${imageHtml}</div>
+        <div class="info">
+          <h3>${pessoa.nome}</h3>
+          <p>${pessoa.funcao}</p>
+          <span class="setor">${pessoa.setor || pessoa.cargo}</span>
+        </div>
+      </div>
+
+      <div class="actions">
+        ${expandButton}
+        ${linkedinButton}
+      </div>
+    </div>
+  `;
+}
+
+function renderPessoaSimples(pessoa){
+  return `
+    <li>
+      ${createCard(pessoa, false)}
+    </li>
+  `;
+}
+
+function renderTimeDireto(pessoasDiretas){
+  const resumo = getResumoTimeDireto(pessoasDiretas);
+
+  return `
+    <li class="collapsed vertical-children nivel-time">
+      <div class="card time-direto">
+        <div class="top">
+          <div class="photo">TD</div>
+
+          <div class="info">
+            <h3>TIME DIRETO</h3>
+            <p>${resumo}</p>
+            <span class="setor">${pessoasDiretas.length} integrante(s)</span>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn expand">+</button>
+          <button class="btn linkedin disabled" disabled>Equipe</button>
+        </div>
+      </div>
+
+      <ul>
+        ${pessoasDiretas.map(renderPessoaSimples).join("")}
+      </ul>
+    </li>
+  `;
+}
+
+function renderNode(pessoa, depth = 0){
+  const filhos = childrenOf(pessoa.id);
+  const liderancas = filhos.filter(f => ehLideranca(f));
+  const timeDireto = filhos.filter(f => !ehLideranca(f));
+  const hasChildren = filhos.length > 0;
+
+  const ultimoNivelGestao = hasChildren && liderancas.length === 0 && timeDireto.length > 0;
+  const verticalClass = depth >= 2 || ultimoNivelGestao ? "vertical-children" : "";
+
+  let filhosHtml = "";
+
+  if(hasChildren){
+    if(ultimoNivelGestao){
+      filhosHtml = timeDireto.map(renderPessoaSimples).join("");
+    }else{
+      filhosHtml = `
+        ${liderancas.map(filho => renderNode(filho, depth + 1)).join("")}
+        ${timeDireto.length ? renderTimeDireto(timeDireto) : ""}
+      `;
+    }
+  }
+
+  return `
+    <li class="${hasChildren ? "collapsed" : ""} ${verticalClass} nivel-${depth}">
+      ${createCard(pessoa, hasChildren)}
+
+      ${hasChildren ? `
+        <ul>
+          ${filhosHtml}
+        </ul>
+      ` : ""}
+    </li>
+  `;
+}
+
+function renderTree(){
+  const roots = pessoas.filter(p => !p.parent);
+  tree.innerHTML = `<ul>${roots.map(root => renderNode(root, 0)).join("")}</ul>`;
+
+  document.querySelectorAll(".expand").forEach(button => {
+    button.addEventListener("click", function(event){
+      event.stopPropagation();
+
+      const li = this.closest("li");
+
+      li.classList.toggle("collapsed");
+      li.classList.toggle("opened", !li.classList.contains("collapsed"));
+
+      this.textContent = li.classList.contains("collapsed") ? "+" : "-";
+
+      setTimeout(() => {
+        centralizarNoAberto(li);
+      }, 250);
+    });
+  });
+}
+
+renderTree();
+
+const viewport = document.getElementById("viewport");
+const canvas = document.getElementById("canvas");
+
+let scale = 1;
+
+function applyZoom(){
+  canvas.style.transform = `scale(${scale})`;
+}
+
+function centralizar(){
+  setTimeout(() => {
+    viewport.scrollLeft = (canvas.scrollWidth - viewport.clientWidth) / 2;
+    viewport.scrollTop = 0;
+  }, 100);
+}
+
+function centralizarNoAberto(li){
+  const rect = li.getBoundingClientRect();
+  const viewRect = viewport.getBoundingClientRect();
+
+  const deslocamento =
+    rect.left - viewRect.left - (viewRect.width / 2) + (rect.width / 2);
+
+  viewport.scrollBy({
+    left: deslocamento,
+    top: 0,
+    behavior: "smooth"
+  });
+}
+
+document.getElementById("zoomIn").addEventListener("click", () => {
+  scale = Math.min(scale + 0.1, 1.8);
+  applyZoom();
+});
+
+document.getElementById("zoomOut").addEventListener("click", () => {
+  scale = Math.max(scale - 0.1, 0.45);
+  applyZoom();
+});
+
+document.getElementById("zoomReset").addEventListener("click", () => {
+  scale = 1;
+  applyZoom();
+
+  setTimeout(() => {
+    viewport.scrollTo({
+      left: (canvas.scrollWidth - viewport.clientWidth) / 2,
+      top: 0,
+      behavior: "smooth"
+    });
+  }, 100);
+});
+
+let isDown = false;
+let startX;
+let startY;
+let scrollLeft;
+let scrollTop;
+
+viewport.addEventListener("mousedown", (e) => {
+  isDown = true;
+  startX = e.pageX - viewport.offsetLeft;
+  startY = e.pageY - viewport.offsetTop;
+  scrollLeft = viewport.scrollLeft;
+  scrollTop = viewport.scrollTop;
+});
+
+viewport.addEventListener("mouseleave", () => {
+  isDown = false;
+});
+
+viewport.addEventListener("mouseup", () => {
+  isDown = false;
+});
+
+viewport.addEventListener("mousemove", (e) => {
+  if(!isDown) return;
+  e.preventDefault();
+
+  const x = e.pageX - viewport.offsetLeft;
+  const y = e.pageY - viewport.offsetTop;
+
+  viewport.scrollLeft = scrollLeft - (x - startX) * 1.2;
+  viewport.scrollTop = scrollTop - (y - startY) * 1.2;
+});
+
+window.addEventListener("load", centralizar);
+window.addEventListener("resize", centralizar);
+
+/* =========================================
+INTRO CHAMPIONS
+========================================= */
+
+const introScreen =
+document.getElementById("introScreen");
+
+const startExperience =
+document.getElementById("startExperience");
+
+const arenaVideo =
+document.querySelector(".arena-video");
+
+arenaVideo.pause();
+
+startExperience.addEventListener("click", () => {
+
+  introScreen.classList.add("hidden");
+
+  arenaVideo.play();
+
+});
+
+/* =========================================
+LINKEDIN MODAL
+========================================= */
+
+const linkedinModal =
+document.getElementById("linkedinModal");
+
+const linkedinFrame =
+document.getElementById("linkedinFrame");
+
+const linkedinFallback =
+document.getElementById("linkedinFallback");
+
+const closeLinkedin =
+document.getElementById("closeLinkedin");
+
+const openLinkedinExternal =
+document.getElementById("openLinkedinExternal");
+
+let currentLinkedin = "";
+
+function openLinkedinModal(url){
+
+  currentLinkedin = url;
+
+  linkedinModal.classList.add("active");
+
+  linkedinFrame.style.display = "block";
+  linkedinFallback.style.display = "none";
+
+  linkedinFrame.src = url;
+
+  setTimeout(() => {
+
+    try{
+
+      const test =
+      linkedinFrame.contentWindow.location.href;
+
+    }catch(e){
+
+      linkedinFrame.style.display = "none";
+
+      linkedinFallback.style.display = "flex";
+    }
+
+  }, 1500);
+}
+
+closeLinkedin.addEventListener("click", () => {
+
+  linkedinModal.classList.remove("active");
+
+  linkedinFrame.src = "";
+
+});
+
+linkedinModal.addEventListener("click", (e) => {
+
+  if(e.target === linkedinModal){
+
+    linkedinModal.classList.remove("active");
+
+    linkedinFrame.src = "";
+  }
+
+});
+
+openLinkedinExternal.addEventListener("click", () => {
+
+  window.open(currentLinkedin, "_blank");
+
+});
+
+</script>
+
