@@ -725,6 +725,11 @@ TELA INICIAL CHAMPIONS
     <source src="videoestadio.mp4" type="video/mp4">
   </video>
 
+  <audio id="audioApito" preload="auto">
+    <source src="audios/apita.m4a" type="audio/mp4">
+  </audio>
+
+
   <div class="toolbar">
     <button class="tool-btn" id="zoomOut">−</button>
     <button class="tool-btn" id="zoomReset">100%</button>
@@ -1094,11 +1099,28 @@ document.querySelector(".arena-video");
 
 arenaVideo.pause();
 
+const audioApito =
+document.getElementById("audioApito");
+
 startExperience.addEventListener("click", () => {
 
-  introScreen.classList.add("hidden");
+  startExperience.disabled = true;
 
-  arenaVideo.play();
+  audioApito.currentTime = 0;
+
+  audioApito.play();
+
+  setTimeout(() => {
+
+    audioApito.pause();
+
+    audioApito.currentTime = 0;
+
+    introScreen.classList.add("hidden");
+
+    arenaVideo.play();
+
+  }, 6000);
 
 });
 
